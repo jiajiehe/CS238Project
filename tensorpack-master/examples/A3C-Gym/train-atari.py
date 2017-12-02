@@ -235,7 +235,7 @@ def get_config():
         model=M,
         dataflow=dataflow,
         callbacks=[
-            ModelSaver(max_to_keep=5),
+            ModelSaver(max_to_keep=2),
             ScheduledHyperParamSetter('learning_rate', [(20, 0.0003), (120, 0.0001)]),
             ScheduledHyperParamSetter('entropy_beta', [(80, 0.005)]),
             HumanHyperParamSetter('learning_rate'),
