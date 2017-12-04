@@ -131,11 +131,11 @@ class Model(ModelDesc):
 
         policy_loss1 = tf.reduce_sum(log_pi_a_given_s * advantage1 * importance * updateweight1, name='policy_loss_1')
         policy_loss2 = tf.reduce_sum(log_pi_a_given_s * advantage2 * importance * updateweight2, name='policy_loss_2')
-        policy_loss = tf.add(policy_loss1 + policy_loss2, name='policy_loss')
+        policy_loss = tf.add(policy_loss1, policy_loss2, name='policy_loss')
         xentropy_loss = tf.reduce_sum(policy * log_probs, name='xentropy_loss')
         value_loss1 = tf.nn.l2_loss((value1 - futurereward1) * tf.sqrt(updateweight1 * 2.0), name='value_loss_1')
         value_loss2 = tf.nn.l2_loss((value2 - futurereward2) * tf.sqrt(updateweight2 * 2.0), name='value_loss_2')
-        value_loss = tf.add(value_loss1 * 0.5 + value_loss2 * 0.5, name='value_loss')
+        value_loss = tf.add(value_loss1 * 0.5, value_loss2 * 0.5, name='value_loss')
 
         pred_reward1 = tf.reduce_mean(value1, name='predict_reward_1')
         pred_reward2 = tf.reduce_mean(value2, name='predict_reward_2')
@@ -147,7 +147,7 @@ class Model(ModelDesc):
                                        initializer=tf.constant_initializer(0.01), trainable=False)
         self.cost = tf.add_n([policy_loss1, policy_loss2, xentropy_loss * entropy_beta, value_loss1, value_loss2])
         self.cost = tf.truediv(self.cost,
-                               tf.cast(tf.shape(futurereward)[0], tf.float32),
+                               tf.cast(tf.shape(futurereward1)[0], tf.float32),
                                name='cost')
         summary.add_moving_summary(policy_loss, xentropy_loss, value_loss,
                                    pred_reward1, pred_reward2, pred_reward_avg,
@@ -200,7 +200,7 @@ class MySimulatorMaster(SimulatorMaster, Callback):
                 updateweight2, updateweight1 = 1.0, 0.0
             client = self.clients[ident]
             client.memory.append(TransitionExperience(
-                state, action, reward=None, value1=value1, value2=value2
+                state, action, reward=None, value1=value1, value2=value2,
                 updateweight1=updateweight1, updateweight2=updateweight2, prob=distrib[action]))
             self.send_queue.put([ident, dumps(action)])
         self.async_predictor.put_task([state], cb)
