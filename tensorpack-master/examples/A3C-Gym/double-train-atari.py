@@ -84,25 +84,19 @@ class Model(ModelDesc):
     def _get_NN_prediction(self, image):
         image = tf.cast(image, tf.float32) / 255.0
         with argscope(Conv2D, nl=tf.nn.relu):
-            l = Conv2D('conv0_1', image, out_channel=32, kernel_shape=5)
-            l = MaxPooling('pool0_1', l, 2)
-            l = Conv2D('conv1_1', l, out_channel=32, kernel_shape=5)
-            l = MaxPooling('pool1_1', l, 2)
-            l = Conv2D('conv2_1', l, out_channel=64, kernel_shape=4)
-            l = MaxPooling('pool2_1', l, 2)
-            l = Conv2D('conv3_1', l, out_channel=64, kernel_shape=3)
+            h = Conv2D('conv0', image, out_channel=32, kernel_shape=5)
+            h = MaxPooling('pool0', h, 2)
+            h = Conv2D('conv1', h, out_channel=32, kernel_shape=5)
+            h = MaxPooling('pool1', h, 2)
+            h = Conv2D('conv2', h, out_channel=64, kernel_shape=4)
+            h1 = MaxPooling('pool2_1', h, 2)
+            h1 = Conv2D('conv3_1', h1, out_channel=64, kernel_shape=3)
+            h2 = MaxPooling('pool2_2', h, 2)
+            h2 = Conv2D('conv3_2', h2, out_channel=64, kernel_shape=3)
 
-            r = Conv2D('conv0_2', image, out_channel=32, kernel_shape=5)
-            r = MaxPooling('pool0_2', r, 2)
-            r = Conv2D('conv1_2', r, out_channel=32, kernel_shape=5)
-            r = MaxPooling('pool1_2', r, 2)
-            r = Conv2D('conv2_2', r, out_channel=64, kernel_shape=4)
-            r = MaxPooling('pool2_2', r, 2)
-            r = Conv2D('conv3_2', r, out_channel=64, kernel_shape=3)
-
-        l = FullyConnected('fc0_1', l, 512, nl=tf.identity)
+        l = FullyConnected('fc0_1', h1, 512, nl=tf.identity)
         l = PReLU('prelu_1', l)
-        r = FullyConnected('fc0_2', r, 512, nl=tf.identity)
+        r = FullyConnected('fc0_2', h2, 512, nl=tf.identity)
         r = PReLU('prelu_2', r)
         concat_lr = tf.concat([l, r], 1)
         logits = FullyConnected('fc-pi', concat_lr, out_dim=NUM_ACTIONS, nl=tf.identity)    # unnormalized policy
