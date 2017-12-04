@@ -123,13 +123,13 @@ class Model(ModelDesc):
         pi_a_given_s = tf.reduce_sum(policy * tf.one_hot(action, NUM_ACTIONS), 1)  # (B,)
         importance = tf.stop_gradient(tf.clip_by_value(pi_a_given_s / (action_prob + 1e-8), 0, 10))
 
-        policy_loss1 = tf.reduce_sum(log_pi_a_given_s * advantage1 * importance * updateweight1, name='policy_loss_1')
-        policy_loss2 = tf.reduce_sum(log_pi_a_given_s * advantage2 * importance * updateweight2, name='policy_loss_2')
+        policy_loss1 = tf.reduce_sum(log_pi_a_given_s * advantage1 * importance * updateweight1 * 0.5, name='policy_loss_1')
+        policy_loss2 = tf.reduce_sum(log_pi_a_given_s * advantage2 * importance * updateweight2 * 0.5, name='policy_loss_2')
         policy_loss = tf.add(policy_loss1, policy_loss2, name='policy_loss')
         xentropy_loss = tf.reduce_sum(policy * log_probs, name='xentropy_loss')
-        value_loss1 = tf.nn.l2_loss((value1 - futurereward1) * tf.sqrt(updateweight1 * 2.0), name='value_loss_1')
-        value_loss2 = tf.nn.l2_loss((value2 - futurereward2) * tf.sqrt(updateweight2 * 2.0), name='value_loss_2')
-        value_loss = tf.add(value_loss1 * 0.5, value_loss2 * 0.5, name='value_loss')
+        value_loss1 = tf.nn.l2_loss((value1 - futurereward1) * tf.sqrt(updateweight1), name='value_loss_1')
+        value_loss2 = tf.nn.l2_loss((value2 - futurereward2) * tf.sqrt(updateweight2), name='value_loss_2')
+        value_loss = tf.add(value_loss1, value_loss2, name='value_loss')
 
         pred_reward1 = tf.reduce_mean(value1, name='predict_reward_1')
         pred_reward2 = tf.reduce_mean(value2, name='predict_reward_2')
