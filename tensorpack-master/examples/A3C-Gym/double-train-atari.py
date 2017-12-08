@@ -89,19 +89,14 @@ class Model(ModelDesc):
             h = Conv2D('conv1', h, out_channel=32, kernel_shape=5)
             h = MaxPooling('pool1', h, 2)
             h = Conv2D('conv2', h, out_channel=64, kernel_shape=4)
-            h1 = MaxPooling('pool2_1', h, 2)
-            h1 = Conv2D('conv3_1', h1, out_channel=64, kernel_shape=3)
-            h2 = MaxPooling('pool2_2', h, 2)
-            h2 = Conv2D('conv3_2', h2, out_channel=64, kernel_shape=3)
+            h = MaxPooling('pool2', h, 2)
+            h = Conv2D('conv3', h, out_channel=64, kernel_shape=3)
 
-        l = FullyConnected('fc0_1', h1, 512, nl=tf.identity)
-        l = PReLU('prelu_1', l)
-        r = FullyConnected('fc0_2', h2, 512, nl=tf.identity)
-        r = PReLU('prelu_2', r)
-        concat_lr = tf.concat([l, r], 1)
-        logits = FullyConnected('fc-pi', concat_lr, out_dim=NUM_ACTIONS, nl=tf.identity)    # unnormalized policy
-        value1 = FullyConnected('fc-v_1', l, 1, nl=tf.identity)
-        value2 = FullyConnected('fc-v_2', r, 1, nl=tf.identity)
+        h = FullyConnected('fc0', h, 512, nl=tf.identity)
+        h = PReLU('prelu', h)
+        logits = FullyConnected('fc-pi', h, out_dim=NUM_ACTIONS, nl=tf.identity)    # unnormalized policy
+        value1 = FullyConnected('fc-v_1', h, 1, nl=tf.identity) 
+        value2 = FullyConnected('fc-v_2', h, 1, nl=tf.identity)
         return logits, value1, value2
 
     def _build_graph(self, inputs):
@@ -123,8 +118,8 @@ class Model(ModelDesc):
         pi_a_given_s = tf.reduce_sum(policy * tf.one_hot(action, NUM_ACTIONS), 1)  # (B,)
         importance = tf.stop_gradient(tf.clip_by_value(pi_a_given_s / (action_prob + 1e-8), 0, 10))
 
-        policy_loss1 = tf.reduce_sum(log_pi_a_given_s * advantage1 * importance * updateweight1 * 0.5, name='policy_loss_1')
-        policy_loss2 = tf.reduce_sum(log_pi_a_given_s * advantage2 * importance * updateweight2 * 0.5, name='policy_loss_2')
+        policy_loss1 = tf.reduce_sum(log_pi_a_given_s * advantage1 * importance * updateweight1, name='policy_loss_1')
+        policy_loss2 = tf.reduce_sum(log_pi_a_given_s * advantage2 * importance * updateweight2, name='policy_loss_2')
         policy_loss = tf.add(policy_loss1, policy_loss2, name='policy_loss')
         xentropy_loss = tf.reduce_sum(policy * log_probs, name='xentropy_loss')
         value_loss1 = tf.nn.l2_loss((value1 - futurereward1) * tf.sqrt(updateweight1), name='value_loss_1')
