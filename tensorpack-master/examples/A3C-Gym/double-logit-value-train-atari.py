@@ -245,6 +245,7 @@ class MySimulatorMaster(SimulatorMaster, Callback):
             client.memory = []
 
 #!!!!!!!!!!!!!!!!!!!!! problem here about how to average policy ?? !!!!!!!!!!!!!!!!!!!!!!!!
+# need to add another layer of eval_policy to pick one from two
 def get_config():
     nr_gpu = get_nr_gpu()
     global PREDICTOR_THREAD
