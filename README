@@ -1,0 +1,22 @@
+========== Source code directory ==========
+
+double_a3c/: Implementation of A3C, double A3C, and less shared double A3C. Please run them with 
+             Python3 (tensorflow required).
+             Usage: python3 train-atari.py --env Breakout-v0 --gpu 0
+                    python3 double-train-atari.py --env Breakout-v0 --gpu 0
+                    python3 shared-double-train-atari.py --env Breakout-v0 --gpu 0
+             The codes of double A3C and LS A3C are based on the A3C implementation in:
+             https://github.com/ppwwyyxx/tensorpack/blob/master/examples/A3C-Gym/train-atari.py
+
+dqn/: Implementation of DQN. Utilize starter codes of homework 2 in Stanford CS234, implemented by
+      Yangxin Zhong, one of the authors in this project. Please run it with Python2 (tensorflow required).
+      Usage: python q5_train_atari_nature.py
+      One needs to edit 'configs/q5_train_atari_nature.py' to change the environment and parameters
+      setting.
+
+
+========== Report directory ==========
+
+exp_results/: Log files of experiments.
+
+proposal/: Project proposol and report. See 'proposal.docx' and 'Report_Combine.docx'
